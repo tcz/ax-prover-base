@@ -1,0 +1,16 @@
+# HyDE retrieval ablation: Sonnet proposer + Opus drafting the hypothetical lemmas, with the HyDE
+# embedding search as the ONLY proposer tool (no web, no LeanSearch). This is the config behind the
+# 20-item PutnamBench result reported in docs/hyde.md (HyDE 7/20).
+#
+#   ax-prover --config hyde.yaml experiment <dataset> --folder <lean_project> --skip-build
+#
+import:
+  - llms.yaml
+  - tools.yaml
+
+prover:
+  prover_llm: ${llm_configs.claude_sonnet_4_5}
+  proposer_tools:
+    search_lean: null
+    search_web: null
+    search_hyde: ${tool_configs.search_hyde}

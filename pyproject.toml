@@ -63,6 +63,13 @@ dev = [
     "setuptools-scm>=8.0",
     "twine>=6.0.0",
 ]
+# HyDE embedding retrieval tool (tools/hyde_search.py): local FAISS index + Qwen3 embedder.
+# Optional so the rest of ax-prover installs without the heavy ML stack.
+hyde = [
+    "faiss-cpu>=1.8.0",
+    "sentence-transformers>=3.0.0",
+    "huggingface_hub>=0.24.0",
+]
 
 [build-system]
 requires = ["setuptools>=61.0", "wheel", "setuptools-scm>=8.0"]

@@ -38,3 +38,31 @@ tool_configs:
     timeout: 60
     max_retries: 3
     retry_delay: 2
+
+  # HyDE (hypothetical-document-embeddings) retrieval over a local Qwen3-4B FAISS index of
+  # Mathlib declarations. A cheap LLM drafts hypothetical Lean lemmas; they are embedded and
+  # cosine-searched against the index, fused by max-cosine, top-k returned.
+  #
+  # Artifacts (index/ids/db) are fetched once from the HuggingFace dataset `hf_repo` if the local
+  # paths are missing — see docs/hyde.md for building/hosting them. Heavy deps live in the
+  # optional `[hyde]` extra: pip install -e ".[hyde]".
+  search_hyde:
+    tool_type: search_hyde
+    hf_repo: tcz/ax-prover-mathlib-hyde-4b        # HF dataset repo holding the artifacts (rename to yours)
+    index_path: data/hyde/q3e4B_sig.faiss         # FAISS IndexFlatIP over L2-normalized 4B embeddings
+    ids_path: data/hyde/ids.npy                   # int64 decl ids; row i of the index <-> ids[i]
+    db_path: data/hyde/lean_explore.db            # decl id -> (name, source_text) for display
+    embed_model: Qwen/Qwen3-Embedding-4B          # MUST match the model the index was built with
+    embed_device: cpu
+    prompt_mode: formal                           # draft formal Lean sigs (matches a formal-sig index)
+    llm:                                          # the cheap "drafter" — Opus here (the run that scored 7/20)
+      model: "anthropic:claude-opus-4-5"
+      provider_config:
+        temperature: 0.7
+        max_tokens: 1024
+    # --- un-tuned hyperparameters (first guess, not swept) ---
+    num_hypotheses: 3                             # hypothetical lemmas drafted per query
+    include_raw_query: true                       # also embed the raw query (never worse than direct retrieval)
+    retrieval_depth: 50                           # per-hypothesis FAISS depth before fusion
+    max_results: 6                                # final count returned (mirrors the LeanSearch baseline)
+    cosine_cutoff: null                           # optional absolute-cosine floor; off (cosine doesn't cleanly separate)
