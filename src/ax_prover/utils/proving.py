@@ -136,7 +136,17 @@ async def prove_single_item(
     item: TargetItem,
     thread_id: str | None = None,
 ) -> ProverAgentState:
-    """Prove a single item and return the full state."""
+    """Prove a single item and return the full state.
+
+    When cross-run strategy memory is enabled, the run starts with `experience`
+    prepopulated from the theorem's strategy ledger, and the ledger is updated
+    from this run's outcome afterwards.
+    """
     initial_state = ProverAgentState(item=item)
+    if getattr(prover, "strategy_memory", None) is not None:
+        prover.strategy_memory.preload_experience(initial_state)
     run_name = f"prove:{item.name}"
-    return await prover.chat(initial_state, run_name=run_name, thread_id=thread_id)
+    final_state = await prover.chat(initial_state, run_name=run_name, thread_id=thread_id)
+    if getattr(prover, "strategy_memory", None) is not None:
+        await prover.strategy_memory.update(final_state)
+    return final_state

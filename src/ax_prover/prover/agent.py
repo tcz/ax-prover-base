@@ -94,6 +94,13 @@ class ProverAgent:
         summary_llm_config = self.config.summarize_output.llm or self.config.prover_llm
         self.summary_llm_client = LLMClient(summary_llm_config)
 
+        self.strategy_memory = None
+        if self.config.strategy_memory.enabled:
+            from .strategy_memory import StrategyMemory
+
+            sm_llm = LLMClient(self.config.strategy_memory.llm or self.config.prover_llm)
+            self.strategy_memory = StrategyMemory(self.config.strategy_memory, sm_llm)
+
         self.max_input_tokens = self.llm_client.profile.get("max_input_tokens")
         if self.max_input_tokens < 1000:
             self.logger.error("Error: max_input_tokens abnormally small")
