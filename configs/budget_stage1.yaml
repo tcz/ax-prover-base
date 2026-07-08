@@ -1,0 +1,14 @@
+# Budget-lottery experiment stage 1: putnam_1972_b6, sequential Opus tickets with
+# cross-run strategy memory. Upstream default tools (LeanSearch + web).
+import:
+  - llms.yaml
+  - tools.yaml
+prover:
+  prover_llm: ${llm_configs.claude_opus_4_5}
+  max_iterations: 25
+  proposer_tools:
+    search_lean: ${tool_configs.search_lean_search}
+    search_web: ${tool_configs.search_web}
+  strategy_memory:
+    enabled: true
+    store_dir: /root/ax-prover-base/scratchpad/budget_run/ledgers
