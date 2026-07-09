@@ -20,6 +20,7 @@ __all__ = [
     "LogLevel",
     "MemoryConfig",
     "ProverConfig",
+    "StrategyMemoryConfig",
     "SummarizeOutputConfig",
 ]
 
@@ -77,6 +78,18 @@ class SummarizeOutputConfig:
 
 
 @dataclass
+class StrategyMemoryConfig:
+    """Cross-run strategy memory: distill failed runs into a per-theorem strategy ledger
+    and prepopulate `experience` from it on later runs of the same theorem."""
+
+    enabled: bool = False
+    store_dir: str = ".axiomatic/strategy_memory"
+    llm: LLMConfig | None = None  # None = use prover_llm
+    max_chars: int = 2500  # ledger size cap
+    max_attempts_in_prompt: int = 12  # most recent attempts shown to the distiller
+
+
+@dataclass
 class ProverConfig:
     """Configuration for ProverAgent."""
 
@@ -87,6 +100,7 @@ class ProverConfig:
         default_factory=lambda: MemoryConfig(class_name="ExperienceProcessor")
     )
     summarize_output: SummarizeOutputConfig = field(default_factory=SummarizeOutputConfig)
+    strategy_memory: StrategyMemoryConfig = field(default_factory=StrategyMemoryConfig)
     user_comments: str | None = None
 
 
